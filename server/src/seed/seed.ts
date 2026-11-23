@@ -18,7 +18,12 @@ export function seedDatabase(db: Db, count = 10_000, seed = 42): void {
   const insertRate = db.prepare('INSERT OR REPLACE INTO fx_rates (currency, usd_per_unit) VALUES (?, ?)');
 
   db.transaction(() => {
-    db.exec('DELETE FROM salary_history; DELETE FROM employees; DELETE FROM fx_rates;');
+    db.exec(`
+      DELETE FROM salary_history;
+      DELETE FROM employees;
+      DELETE FROM fx_rates;
+      DELETE FROM sqlite_sequence WHERE name IN ('employees', 'salary_history');
+    `);
     for (const c of COUNTRIES) insertRate.run(c.currency, 1 / c.localPerUsd);
     for (const e of employees) {
       const { lastInsertRowid } = insertEmployee.run(e);
