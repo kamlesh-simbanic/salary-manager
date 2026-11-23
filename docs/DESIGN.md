@@ -29,3 +29,5 @@ flowchart LR
 - **Server-side pagination** with whitelisted sort columns.
 - **SQLite**: zero-ops and allowed by the brief; Postgres is the upgrade path past a single node.
 - **In-memory DB per test** for fast, isolated tests.
+
+See [SOLID_AND_PATTERNS.md](SOLID_AND_PATTERNS.md) for how SOLID and design patterns are applied, with file references.
