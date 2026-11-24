@@ -2,7 +2,10 @@ import PaymentsIcon from '@mui/icons-material/Payments'
 import { AppBar, Button, Container, Toolbar, Typography } from '@mui/material'
 import { NavLink, Outlet } from 'react-router-dom'
 
-const NAV = [{ to: '/employees', label: 'Employees' }]
+const NAV = [
+  { to: '/employees', label: 'Employees' },
+  { to: '/insights', label: 'Insights' },
+]
 
 export function AppLayout() {
   return (
