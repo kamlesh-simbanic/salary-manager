@@ -23,12 +23,16 @@ export type EmployeeChanges = Partial<NewEmployee>;
 export const SORT_KEYS = ['lastName', 'salary', 'hireDate', 'country', 'jobTitle'] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 
-export interface EmployeeListQuery {
+/** Row filters shared by the employee list and the insights queries. */
+export interface EmployeeFilter {
   search?: string;
   country?: string;
   department?: string;
   jobTitle?: string;
   status?: EmployeeStatus;
+}
+
+export interface EmployeeListQuery extends EmployeeFilter {
   sortBy: SortKey;
   sortDir: 'asc' | 'desc';
   page: number;

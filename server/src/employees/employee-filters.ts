@@ -1,4 +1,4 @@
-import type { EmployeeListQuery, SortKey } from './employee.types.js';
+import type { EmployeeFilter, SortKey } from './employee.types.js';
 
 interface Fragment {
   sql: string;
@@ -6,7 +6,7 @@ interface Fragment {
 }
 
 /** One filter = one small function. Adding a filter never touches existing ones (Open/Closed). */
-type FilterClause = (query: EmployeeListQuery) => Fragment | null;
+type FilterClause = (query: EmployeeFilter) => Fragment | null;
 
 const equals =
   (field: 'country' | 'department' | 'jobTitle' | 'status', column: string): FilterClause =>
@@ -33,7 +33,7 @@ const FILTERS: FilterClause[] = [
   equals('status', 'status'),
 ];
 
-export function buildWhere(query: EmployeeListQuery): { where: string; params: Record<string, string> } {
+export function buildWhere(query: EmployeeFilter): { where: string; params: Record<string, string> } {
   const fragments = FILTERS.map((f) => f(query)).filter((f): f is Fragment => f !== null);
   return {
     where: fragments.length ? `WHERE ${fragments.map((f) => f.sql).join(' AND ')}` : '',
