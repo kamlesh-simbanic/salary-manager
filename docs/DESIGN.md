@@ -31,3 +31,11 @@ flowchart LR
 - **In-memory DB per test** for fast, isolated tests.
 
 See [SOLID_AND_PATTERNS.md](SOLID_AND_PATTERNS.md) for how SOLID and design patterns are applied, with file references.
+
+## Insights UI decisions
+- **Median first**, not average: the mean is pulled up by high earners, so the cards show both and label them.
+- **USD normalisation** is stated on the page so nobody mistakes converted numbers for local pay.
+- **Charts**: one series per chart, so one hue and no legend; thin bars with the value at the tip; every chart has a hover tooltip and the group chart has a **Table** view with exact numbers (accessibility and precision).
+- **Insights default to active employees**; an Active/Inactive toggle switches the population.
+- Filters (country, department, job title) apply to every widget on the page at once.
+
