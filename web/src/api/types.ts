@@ -30,3 +30,37 @@ export interface EmployeeFacets {
   departments: string[]
   jobTitles: string[]
 }
+
+// ---- Insights (all money normalised to USD minor units / cents) ----
+export type Dimension = 'country' | 'department' | 'jobTitle'
+
+export interface PayStats {
+  count: number
+  minUsdMinor: number
+  medianUsdMinor: number
+  meanUsdMinor: number
+  maxUsdMinor: number
+  totalUsdMinor: number
+}
+
+export interface GroupPayStats extends PayStats {
+  key: string
+}
+
+export interface DistributionBucket {
+  fromUsdMinor: number
+  toUsdMinor: number
+  count: number
+}
+
+export interface Earner {
+  id: number
+  firstName: string
+  lastName: string
+  jobTitle: string
+  department: string
+  country: string
+  currency: string
+  salaryMinor: number
+  salaryUsdMinor: number
+}
