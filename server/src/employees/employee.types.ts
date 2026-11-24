@@ -39,6 +39,13 @@ export interface EmployeeListQuery extends EmployeeFilter {
   pageSize: number;
 }
 
+/** Distinct values used to populate filter dropdowns. */
+export interface EmployeeFacets {
+  countries: string[];
+  departments: string[];
+  jobTitles: string[];
+}
+
 export interface Page<T> {
   items: T[];
   total: number;

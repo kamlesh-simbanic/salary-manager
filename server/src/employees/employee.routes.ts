@@ -6,6 +6,9 @@ import { idParamSchema, listQuerySchema, newEmployeeSchema, updateEmployeeSchema
 export function registerEmployeeRoutes(app: FastifyInstance, service: EmployeeService): void {
   app.get('/api/employees', async (req) => service.list(listQuerySchema.parse(req.query)));
 
+  // Registered as a static path; Fastify prefers it over the parametric /:id route.
+  app.get('/api/employees/facets', async () => service.facets());
+
   app.post('/api/employees', async (req, reply) => {
     const employee = service.create(newEmployeeSchema.parse(req.body));
     return reply.code(201).send(employee);

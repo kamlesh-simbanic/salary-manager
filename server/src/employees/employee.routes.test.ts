@@ -36,6 +36,14 @@ describe('employee routes', () => {
     expect((await create({ email: 'same@x.example' })).statusCode).toBe(409);
   });
 
+  it('GET /facets returns distinct filter values (not treated as an id)', async () => {
+    await create({ country: 'India' });
+    await create({ country: 'India' });
+    const res = await app.inject({ url: '/api/employees/facets' });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().countries).toEqual(['India']);
+  });
+
   it('GET unknown employee returns 404', async () => {
     expect((await app.inject({ url: '/api/employees/999' })).statusCode).toBe(404);
   });

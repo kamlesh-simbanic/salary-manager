@@ -31,6 +31,17 @@ describe('SqliteEmployeeRepository', () => {
     expect(updated).toMatchObject({ salaryMinor: 42, jobTitle: 'Engineer' });
   });
 
+  it('returns sorted distinct facet values', () => {
+    repo.insert(sampleEmployee({ country: 'India', department: 'Sales', jobTitle: 'Rep' }));
+    repo.insert(sampleEmployee({ country: 'India', department: 'Engineering', jobTitle: 'Dev' }));
+    repo.insert(sampleEmployee({ country: 'Germany', department: 'Sales', jobTitle: 'Rep' }));
+    expect(repo.facets()).toEqual({
+      countries: ['Germany', 'India'],
+      departments: ['Engineering', 'Sales'],
+      jobTitles: ['Dev', 'Rep'],
+    });
+  });
+
   it('deletes and reports whether a row existed', () => {
     const created = repo.insert(sampleEmployee());
     expect(repo.delete(created.id)).toBe(true);

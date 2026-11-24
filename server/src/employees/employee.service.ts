@@ -2,7 +2,14 @@ import { ConflictError, NotFoundError, ValidationError } from '../shared/errors.
 import type { TransactionRunner } from '../shared/transaction.js';
 import type { SalaryHistoryEntry, SalaryHistoryRepository } from '../history/salary-history.repository.js';
 import type { EmployeeReader, EmployeeWriter } from './employee.repository.js';
-import type { Employee, EmployeeChanges, EmployeeListQuery, NewEmployee, Page } from './employee.types.js';
+import type {
+  Employee,
+  EmployeeChanges,
+  EmployeeFacets,
+  EmployeeListQuery,
+  NewEmployee,
+  Page,
+} from './employee.types.js';
 
 /**
  * Application use cases for employees. Depends only on abstractions
@@ -19,6 +26,10 @@ export class EmployeeService {
 
   list(query: EmployeeListQuery): Page<Employee> {
     return this.reader.list(query);
+  }
+
+  facets(): EmployeeFacets {
+    return this.reader.facets();
   }
 
   get(id: number): Employee {

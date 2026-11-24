@@ -1,7 +1,14 @@
 import type { Db } from '../db/index.js';
 import { buildWhere, SORT_COLUMNS } from './employee-filters.js';
 import type { EmployeeRepository } from './employee.repository.js';
-import type { Employee, EmployeeChanges, EmployeeListQuery, NewEmployee, Page } from './employee.types.js';
+import type {
+  Employee,
+  EmployeeChanges,
+  EmployeeFacets,
+  EmployeeListQuery,
+  NewEmployee,
+  Page,
+} from './employee.types.js';
 
 /** Column aliases map snake_case rows straight to the camelCase Employee shape. */
 const SELECT = `SELECT id, first_name AS firstName, last_name AS lastName, email, job_title AS jobTitle,
@@ -44,6 +51,14 @@ export class SqliteEmployeeRepository implements EmployeeRepository {
       )
       .all({ ...params, limit: query.pageSize, offset: (query.page - 1) * query.pageSize }) as Employee[];
     return { items, total, page: query.page, pageSize: query.pageSize };
+  }
+
+  facets(): EmployeeFacets {
+    const distinct = (column: string) =>
+      (this.db.prepare(`SELECT DISTINCT ${column} AS value FROM employees ORDER BY value`).all() as { value: string }[]).map(
+        (row) => row.value,
+      );
+    return { countries: distinct('country'), departments: distinct('department'), jobTitles: distinct('job_title') };
   }
 
   insert(employee: NewEmployee): Employee {
