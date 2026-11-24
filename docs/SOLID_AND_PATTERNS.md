@@ -19,7 +19,7 @@ Dependencies point **inwards, towards abstractions**. Only `app.ts` knows the co
 | **S**ingle Responsibility | Each file has one reason to change. `employee.schema.ts` = input validation. `employee-filters.ts` = turning a query into SQL `WHERE`. `sqlite-employee.repository.ts` = SQL only. `employee.service.ts` = business rules (unique email, history on salary change). `employee.routes.ts` = HTTP mapping only. |
 | **O**pen/Closed | List filters are an array of small `FilterClause` functions in `employee-filters.ts`. A new filter (e.g. hire-date range) is one new function appended to the array; no existing filter or the repository changes. Sorting uses a `SORT_COLUMNS` map, so a new sort key is one line. |
 | **L**iskov Substitution | Any `EmployeeReader`/`EmployeeWriter`/`SalaryHistoryRepository`/`TransactionRunner` implementation can replace the SQLite one (e.g. an in-memory fake, or a Postgres repository) and `EmployeeService` behaves identically. Contracts are expressed in the interfaces (`findById` returns `undefined`, never throws). |
-| **I**nterface Segregation | `EmployeeRepository = EmployeeReader & EmployeeWriter`. Read-only consumers (list, and later insights and CSV export) depend on `EmployeeReader` only and cannot mutate data. |
+| **I**nterface Segregation | `EmployeeRepository = EmployeeReader & EmployeeWriter`. Read-only consumers (list, CSV export) depend on `EmployeeReader` only. Insights has its own read-only `InsightsReader`, so analytics can never modify data. |
 | **D**ependency Inversion | `EmployeeService` depends on interfaces plus an injected clock (`now: () => Date`), never on `better-sqlite3`. Concrete classes are wired once in `buildApp()` (composition root). |
 
 ## Design patterns
@@ -31,9 +31,17 @@ Dependencies point **inwards, towards abstractions**. Only `app.ts` knows the co
 | **Dependency Injection** (constructor) | `EmployeeService`, `Sqlite*Repository` | Explicit dependencies; trivial to substitute in tests. |
 | **Composition Root / Factory** | `buildApp(db)` in `app.ts`, `createDb()` in `db/index.ts` | One place builds the object graph; tests call `buildApp(createDb(':memory:'))`. |
 | **Specification-style filter chain** | `employee-filters.ts` | Each filter is an independent, composable predicate producing a SQL fragment + params. |
+| **Reuse via shared abstraction** | `EmployeeFilter` type + `buildWhere()` used by both the employee list and the insights queries | One definition of "filter employees"; a new filter automatically works in both places (DRY + Open/Closed). |
+| **Pure function core** | `insights/histogram.ts` (`fillBuckets`) | Gap-filling logic is isolated from SQL and HTTP, so it is unit-tested with plain arrays. |
 | **Adapter** | `employee.routes.ts` | Translates HTTP <-> use cases; contains no business rules. |
 | **Data Transfer / Validation at the boundary** | `employee.schema.ts` (Zod) | Input is parsed once at the edge; the inside of the system only sees typed, valid data. |
 | **Error hierarchy + central handler** | `shared/errors.ts`, `setErrorHandler` in `app.ts` | Domain code throws `NotFoundError`/`ConflictError`/`ValidationError`; one place maps them to HTTP status codes. |
+
+## Insights module (same shape as employees)
+
+`insights.routes` -> `InsightsService` -> `InsightsReader` (interface) <- `SqliteInsightsRepository`.
+The service tests use a **stub reader** (no database) to prove the dependency inversion pays off.
+Dimensions (`country | department | jobTitle`) are a whitelist map to columns, so grouping by user input cannot inject SQL.
 
 ## Other deliberate decisions
 
@@ -48,6 +56,9 @@ Dependencies point **inwards, towards abstractions**. Only `app.ts` knows the co
 Zod 4's `.partial()` kept the `status` default, so `PATCH {salaryMinor}` would have reset an inactive employee to *active*. Fixed by building the PATCH schema from a shape without defaults (see comment in `employee.schema.ts`), covered by `employee.schema.test.ts`.
 
 ## Trade-offs
+
+- Insights normalise everything to USD with a static rate table. Employees whose currency has no rate are excluded (not mis-converted). A production version would validate the currency on write and surface the excluded count.
+- Insights default to **active** employees only, since "how do we pay people" is about current pay; `status=inactive` is available.
 
 - `EmployeeService` has more constructor parameters than a simpler design; the payoff is that it is fully testable and swappable. If it grows further it should be split by use case (query vs. command), which the Reader/Writer split already prepares.
 - Search uses `LIKE '%term%'`, which cannot use an index. At 10k rows it measures under 10 ms. At millions of rows I would move to SQLite FTS5 or Postgres trigram indexes.
