@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { api } from './client'
+import { buildQuery } from './query'
 import type { Employee, EmployeeFacets, EmployeeStatus, Page, SortDir, SortKey } from './types'
 
 export interface EmployeeListParams {
@@ -27,14 +28,7 @@ export const DEFAULT_LIST_PARAMS: EmployeeListParams = {
   pageSize: 25,
 }
 
-/** Drops empty values so the URL only carries active filters. */
-export function toQueryString(params: EmployeeListParams): string {
-  const query = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) {
-    if (value !== '' && value !== undefined) query.set(key, String(value))
-  }
-  return query.toString()
-}
+export const toQueryString = (params: EmployeeListParams): string => buildQuery(params)
 
 export function useEmployees(params: EmployeeListParams) {
   return useQuery({

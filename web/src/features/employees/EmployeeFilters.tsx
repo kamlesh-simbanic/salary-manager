@@ -1,5 +1,6 @@
 import SearchIcon from '@mui/icons-material/Search'
-import { Button, InputAdornment, MenuItem, Stack, TextField } from '@mui/material'
+import { Button, InputAdornment, Stack, TextField } from '@mui/material'
+import { FilterSelect } from '../../components/FilterSelect'
 import type { EmployeeFacets, EmployeeStatus } from '../../api/types'
 
 export interface FilterValues {
@@ -15,29 +16,6 @@ interface Props {
   facets?: EmployeeFacets
   onChange: (patch: Partial<FilterValues>) => void
   onClear: () => void
-}
-
-function Select({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string
-  value: string
-  options: string[]
-  onChange: (value: string) => void
-}) {
-  return (
-    <TextField select size="small" label={label} value={value} onChange={(e) => onChange(e.target.value)} sx={{ minWidth: 170 }}>
-      <MenuItem value="">All</MenuItem>
-      {options.map((option) => (
-        <MenuItem key={option} value={option}>
-          {option}
-        </MenuItem>
-      ))}
-    </TextField>
-  )
 }
 
 export function EmployeeFilters({ values, facets, onChange, onClear }: Props) {
@@ -60,15 +38,15 @@ export function EmployeeFilters({ values, facets, onChange, onClear }: Props) {
           },
         }}
       />
-      <Select label="Country" value={values.country} options={facets?.countries ?? []} onChange={(country) => onChange({ country })} />
-      <Select
+      <FilterSelect label="Country" value={values.country} options={facets?.countries ?? []} onChange={(country) => onChange({ country })} />
+      <FilterSelect
         label="Department"
         value={values.department}
         options={facets?.departments ?? []}
         onChange={(department) => onChange({ department })}
       />
-      <Select label="Job title" value={values.jobTitle} options={facets?.jobTitles ?? []} onChange={(jobTitle) => onChange({ jobTitle })} />
-      <Select
+      <FilterSelect label="Job title" value={values.jobTitle} options={facets?.jobTitles ?? []} onChange={(jobTitle) => onChange({ jobTitle })} />
+      <FilterSelect
         label="Status"
         value={values.status}
         options={['active', 'inactive']}
