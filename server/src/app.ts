@@ -5,6 +5,9 @@ import type { Db } from './db/index.js';
 import { registerEmployeeRoutes } from './employees/employee.routes.js';
 import { EmployeeService } from './employees/employee.service.js';
 import { SqliteEmployeeRepository } from './employees/sqlite-employee.repository.js';
+import { registerInsightsRoutes } from './insights/insights.routes.js';
+import { InsightsService } from './insights/insights.service.js';
+import { SqliteInsightsRepository } from './insights/sqlite-insights.repository.js';
 import { SqliteSalaryHistoryRepository } from './history/sqlite-salary-history.repository.js';
 import { AppError } from './shared/errors.js';
 import { SqliteTransactionRunner } from './shared/transaction.js';
@@ -18,8 +21,11 @@ export function buildApp(db: Db): FastifyInstance {
   const history = new SqliteSalaryHistoryRepository(db);
   const service = new EmployeeService(employees, employees, history, new SqliteTransactionRunner(db));
 
+  const insights = new InsightsService(new SqliteInsightsRepository(db));
+
   app.get('/api/health', async () => ({ status: 'ok' }));
   registerEmployeeRoutes(app, service);
+  registerInsightsRoutes(app, insights);
 
   app.setErrorHandler((error, _req, reply) => {
     if (error instanceof ZodError) {
